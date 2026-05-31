@@ -8,13 +8,13 @@
 <style>
 :root{--blue:#005BBB;--red:#D32F2F;--text:#1f2937;--muted:#667085;--line:#d0d5dd;--bg:#f5f7fb;--card:#ffffff}
 body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
-.container{max-width:700px;margin:auto;padding:20px}.card{background:var(--card);padding:20px;border-radius:16px;box-shadow:0 8px 24px rgba(16,24,40,.08);border:1px solid #eaecf0}h1{margin-top:0;color:var(--text)}
+.container{max-width:700px;margin:auto;padding:20px}.card{background:var(--card);padding:20px;border-radius:16px;box-shadow:0 8px 24px rgba(16,24,40,.08);border:1px solid #eaecf0}.brand-header{display:flex;align-items:center;gap:14px;margin-bottom:14px;flex-wrap:wrap}.playnation-logo{display:flex;align-items:center;font-weight:700;font-size:32px;letter-spacing:-1px;line-height:1}.playnation-logo .tile{display:inline-flex;align-items:center;justify-content:center;width:34px;height:42px;color:#fff;margin-right:2px}.playnation-logo .p{background:#8a0f3d}.playnation-logo .l{background:#e30613}.playnation-logo .a{background:#8fb0c4}.playnation-logo .y{background:#263238}.playnation-logo .nation{color:#263238;margin-left:5px;font-weight:500}.brand-header h1{margin:0;color:var(--text);font-size:30px}@media(max-width:600px){.brand-header{gap:10px}.playnation-logo{font-size:24px}.playnation-logo .tile{width:28px;height:34px}.brand-header h1{font-size:26px}}h1{margin-top:0;color:var(--text)}
 input,select{width:100%;padding:16px;font-size:18px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--text);box-sizing:border-box}input[type="file"]{background:#fff;border:1px dashed var(--blue)}
 button{width:100%;padding:16px;font-size:18px;border:none;border-radius:12px;margin-top:12px;cursor:pointer;font-weight:bold}.next{background:var(--blue);color:#fff}.back{background:var(--red);color:white}.danger{background:var(--red);color:white}.progress{height:10px;background:#e4e7ec;border-radius:10px;margin-bottom:20px;overflow:hidden}.bar{height:100%;background:var(--blue);width:0%}.small{color:var(--muted);font-size:14px;line-height:1.4}.machine-count{text-align:right;color:var(--muted);font-size:14px;line-height:1.4;margin:0 0 12px 0;font-weight:bold}.photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:15px}.photo-box{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}.photo-box img{width:100%;display:block}.photo-box button{margin:0;border-radius:0;background:var(--red);color:white;font-size:14px;padding:10px}.review-box{background:#fff;border:1px solid var(--line);padding:12px;border-radius:12px;margin:10px 0}.notice{background:#eef4ff;border:1px solid var(--blue);color:#1849a9;padding:12px;border-radius:12px;margin:12px 0}.ok{background:#ecfdf3;border:1px solid #12b76a;color:#027a48;padding:12px;border-radius:12px;margin:12px 0}.error{background:#fef3f2;border:1px solid var(--red);color:#b42318;padding:12px;border-radius:12px;margin:12px 0}@media(max-width:600px){.container{padding:12px}.card{padding:18px}h1{font-size:28px}input,select,button{font-size:18px;min-height:58px}.photo-grid{grid-template-columns:1fr}.machine-count{text-align:right}}
 </style>
 </head>
 <body>
-<div class="container"><div class="card"><h1>Machine Movement App</h1><div class="progress"><div class="bar" id="bar"></div></div><div id="app"></div></div></div>
+<div class="container"><div class="card"><div class="brand-header"><div class="playnation-logo" aria-label="playnation logo"><span class="tile p">p</span><span class="tile l">l</span><span class="tile a">a</span><span class="tile y">y</span><span class="nation">nation</span></div><h1>Machine Movement App</h1></div><div class="progress"><div class="bar" id="bar"></div></div><div id="app"></div></div></div>
 <script>
 const steps=[
   ["Current Site","currentSite","text"],
@@ -277,7 +277,8 @@ async function downloadExcelFile(){
         setCell(docket,`E${dr}`,m.stock);
         setCell(docket,`F${dr}`,m.serial);
         setCell(docket,`G${dr}`,m.movementPlace);
-        setCell(docket,`H${dr}`,moveType);
+        // Movement type is not required on the Transport Docket, so keep column H blank.
+        setCell(docket,`H${dr}`,"");
       }
     });
 
