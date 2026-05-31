@@ -205,7 +205,16 @@ async function loadStoredTemplate(){
 function setCell(ws,address,value){const cell=ws.getCell(address);cell.value=value || "";}
 function getSheet(workbook,names){for(const n of names){const ws=workbook.getWorksheet(n);if(ws)return ws;}return workbook.worksheets[0];}
 function todayText(){return new Date().toLocaleDateString("en-GB");}
-function movementRow(index){return 5+index;}
+function excelColumn(n){
+  let s="";
+  while(n>0){
+    let m=(n-1)%26;
+    s=String.fromCharCode(65+m)+s;
+    n=Math.floor((n-1)/26);
+  }
+  return s;
+}
+function movementColumn(index){return excelColumn(2+index);}
 function docketRow(index){return 5+index;}
 async function downloadExcelFile(){
   try{
@@ -223,19 +232,21 @@ async function downloadExcelFile(){
       const moveDate=movementDateText(m);
       const moveType=movementTypeDisplay(m);
       const placeLabel=movementPlaceLabel(m);
-      const mr=movementRow(i);
       const dr=docketRow(i);
 
       if(movement){
-        setCell(movement,`A${mr}`,m.currentSite);
-        setCell(movement,`B${mr}`,moveDate);
-        setCell(movement,`C${mr}`,moveType);
-        setCell(movement,`D${mr}`,placeLabel);
-        setCell(movement,`E${mr}`,m.movementPlace);
-        setCell(movement,`F${mr}`,m.machineName);
-        setCell(movement,`G${mr}`,m.model);
-        setCell(movement,`H${mr}`,m.stock);
-        setCell(movement,`I${mr}`,m.serial);
+        const mc=movementColumn(i);
+        // Master Movement is a form-style sheet: each machine gets one column,
+        // and the details go down the rows beside the existing labels.
+        setCell(movement,`${mc}1`,m.currentSite);
+        setCell(movement,`${mc}2`,moveDate);
+        setCell(movement,`${mc}3`,moveType);
+        setCell(movement,`${mc}5`,m.machineName);
+        setCell(movement,`${mc}6`,m.model);
+        setCell(movement,`${mc}7`,m.stock);
+        setCell(movement,`${mc}8`,m.serial);
+        setCell(movement,`${mc}10`,m.currentSite);
+        setCell(movement,`${mc}11`,m.movementPlace);
       }
       if(docket){
         setCell(docket,`A${dr}`,m.currentSite);
