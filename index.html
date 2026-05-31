@@ -4,126 +4,142 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Machine Movement App</title>
+<script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <style>
-body{
-margin:0;
-font-family:Arial,sans-serif;
-background:#111820;
-color:white;
-}
-.container{
-max-width:700px;
-margin:auto;
-padding:20px;
-}
-.card{
-background:#1b2430;
-padding:20px;
-border-radius:16px;
-}
-h1{margin-top:0}
-input{
-width:100%;
-padding:16px;
-font-size:18px;
-border-radius:12px;
-border:1px solid #444;
-background:#111;
-color:#fff;
-box-sizing:border-box;
-}
-button{
-width:100%;
-padding:16px;
-font-size:18px;
-border:none;
-border-radius:12px;
-margin-top:12px;
-cursor:pointer;
-}
-.next{
-background:#d4af37;
-color:#111;
-font-weight:bold;
-}
-.back{
-background:#333;
-color:white;
-}
-.progress{
-height:10px;
-background:#333;
-border-radius:10px;
-margin-bottom:20px;
-overflow:hidden;
-}
-.bar{
-height:100%;
-background:#d4af37;
-width:0%;
-}
+body{margin:0;font-family:Arial,sans-serif;background:#111820;color:white}.container{max-width:700px;margin:auto;padding:20px}.card{background:#1b2430;padding:20px;border-radius:16px}h1{margin-top:0}input{width:100%;padding:16px;font-size:18px;border-radius:12px;border:1px solid #444;background:#111;color:#fff;box-sizing:border-box}input[type="file"]{background:#111;border:1px dashed #d4af37}button{width:100%;padding:16px;font-size:18px;border:none;border-radius:12px;margin-top:12px;cursor:pointer}.next{background:#d4af37;color:#111;font-weight:bold}.back{background:#333;color:white}.danger{background:#5a2424;color:white}.progress{height:10px;background:#333;border-radius:10px;margin-bottom:20px;overflow:hidden}.bar{height:100%;background:#d4af37;width:0%}.small{color:#b7c1cc;font-size:14px;line-height:1.4}.photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:15px}.photo-box{background:#111;border:1px solid #333;border-radius:12px;overflow:hidden}.photo-box img{width:100%;display:block}.photo-box button{margin:0;border-radius:0;background:#5a2424;color:white;font-size:14px;padding:10px}.review-box{background:#111;border:1px solid #333;padding:12px;border-radius:12px;margin:10px 0}.notice{background:#101820;border:1px solid #d4af37;color:#f3e4a3;padding:12px;border-radius:12px;margin:12px 0}.ok{background:#18351f;border:1px solid #2f9e44;color:#d8ffd8;padding:12px;border-radius:12px;margin:12px 0}.error{background:#3b1818;border:1px solid #b42318;color:#ffdcdc;padding:12px;border-radius:12px;margin:12px 0}@media(max-width:600px){.container{padding:12px}.card{padding:18px}h1{font-size:28px}input,button{font-size:18px;min-height:58px}.photo-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div class="container">
-<div class="card">
-<h1>Machine Movement App</h1>
-<div class="progress"><div class="bar" id="bar"></div></div>
-<div id="app"></div>
-</div>
-</div>
-
+<div class="container"><div class="card"><h1>Machine Movement App</h1><div class="progress"><div class="bar" id="bar"></div></div><div id="app"></div></div></div>
 <script>
 const steps=[
-["Current Site","currentSite"],
-["Destination","destination"],
-["Machine Name","machineName"],
-["Model","model"],
-["Stock Number","stock"],
-["Serial Number","serial"]
+  ["Current Site","currentSite"],
+  ["Destination","destination"],
+  ["Machine Name","machineName"],
+  ["Model","model"],
+  ["Stock Number","stock"],
+  ["Serial Number","serial"],
+  ["Machine Photos","photos"]
 ];
 
 let current=0;
-let data={};
+let data=JSON.parse(localStorage.getItem("machineMovementLockedBase") || "{}");
+if(!data.photos) data.photos=[];
+let templateBuffer=null;
+let templateName="";
+const storedTemplateFiles=["template.xlsx","template.xlsm"];
+
+function save(){localStorage.setItem("machineMovementLockedBase",JSON.stringify(data));}
 
 function render(){
-const app=document.getElementById("app");
-document.getElementById("bar").style.width=((current)/steps.length*100)+"%";
-
-if(current<steps.length){
-app.innerHTML=`
-<h2>${steps[current][0]}</h2>
-<input id="field" value="${data[steps[current][1]]||''}">
-<button class="next" onclick="nextStep()">Next</button>
-${current>0?'<button class="back" onclick="backStep()">Back</button>':''}
-`;
-}else{
-app.innerHTML=`
-<h2>Review</h2>
-<p><strong>Current Site:</strong> ${data.currentSite||''}</p>
-<p><strong>Destination:</strong> ${data.destination||''}</p>
-<p><strong>Machine Name:</strong> ${data.machineName||''}</p>
-<p><strong>Model:</strong> ${data.model||''}</p>
-<p><strong>Stock Number:</strong> ${data.stock||''}</p>
-<p><strong>Serial Number:</strong> ${data.serial||''}</p>
-<button class="next" onclick="window.print()">Print / Save PDF</button>
-`;
+  const app=document.getElementById("app");
+  document.getElementById("bar").style.width=((current)/steps.length*100)+"%";
+  if(current<6){
+    app.innerHTML=`<h2>${steps[current][0]}</h2><input id="field" value="${escapeHtml(data[steps[current][1]]||'')}" autocomplete="off"><button class="next" onclick="nextStep()">Next</button>${current>0?'<button class="back" onclick="backStep()">Back</button>':''}${current===0?'<button class="danger" onclick="clearForm()">Clear Form</button>':''}`;
+  }else if(current===6){
+    app.innerHTML=`<h2>Machine Photos</h2><p class="small">Take or upload up to 5 photos of the machine.</p><input id="photoInput" type="file" accept="image/*" capture="environment" multiple onchange="addPhotos(event)"><p class="small">${data.photos.length} of 5 photos added</p><div class="photo-grid">${data.photos.map((p,i)=>`<div class="photo-box"><img src="${p}"><button onclick="removePhoto(${i})">Remove photo</button></div>`).join("")}</div><button class="next" onclick="nextStep()">Next</button><button class="back" onclick="backStep()">Back</button>`;
+  }else{
+    app.innerHTML=`<h2>Review</h2>
+      <div class="review-box"><strong>Current Site:</strong><br>${escapeHtml(data.currentSite||'')}</div>
+      <div class="review-box"><strong>Destination:</strong><br>${escapeHtml(data.destination||'')}</div>
+      <div class="review-box"><strong>Machine Name:</strong><br>${escapeHtml(data.machineName||'')}</div>
+      <div class="review-box"><strong>Model:</strong><br>${escapeHtml(data.model||'')}</div>
+      <div class="review-box"><strong>Stock Number:</strong><br>${escapeHtml(data.stock||'')}</div>
+      <div class="review-box"><strong>Serial Number:</strong><br>${escapeHtml(data.serial||'')}</div>
+      <div class="review-box"><strong>Photos:</strong><br>${data.photos.length} attached</div>
+      <div class="photo-grid">${data.photos.map(p=>`<div class="photo-box"><img src="${p}"></div>`).join("")}</div>
+      <div class="notice"><strong>Stored Excel template</strong><br>The app now loads the workbook template from the same folder as this HTML file. Add the template to GitHub as <strong>template.xlsx</strong> or <strong>template.xlsm</strong>. No upload step is needed.</div>
+      <div id="templateStatus" class="small">Template will load automatically when you press download.</div>
+      <button class="next" onclick="downloadExcelFile()">Download Filled Excel File</button>
+      <button class="back" onclick="backStep()">Back</button>
+      <button class="danger" onclick="clearForm()">Clear Form</button>`;
+  }
 }
+function nextStep(){if(current<6){const field=document.getElementById("field");if(!field.value.trim()) return;data[steps[current][1]]=field.value.trim();save();}current++;render();}
+function backStep(){if(current>0){current--;render();}}
+function addPhotos(event){const files=Array.from(event.target.files);const remaining=5-data.photos.length;if(remaining<=0){alert("Maximum 5 photos allowed.");return;}files.slice(0,remaining).forEach(file=>{const reader=new FileReader();reader.onload=e=>{data.photos.push(e.target.result);save();render();};reader.readAsDataURL(file);});if(files.length>remaining) alert("Only 5 photos maximum. Extra photos were not added.");}
+function removePhoto(index){data.photos.splice(index,1);save();render();}
+function clearForm(){if(confirm("Clear this movement form?")){data={photos:[]};save();current=0;templateBuffer=null;templateName="";render();}}
+async function loadStoredTemplate(){
+  if(templateBuffer) return templateBuffer;
+  let lastError="";
+  for(const fileName of storedTemplateFiles){
+    try{
+      const response=await fetch(fileName,{cache:"no-store"});
+      if(!response.ok){lastError=`${fileName}: ${response.status}`; continue;}
+      templateBuffer=await response.arrayBuffer();
+      templateName=fileName;
+      const status=document.getElementById("templateStatus");
+      if(status) status.innerHTML=`<div class="ok">Template loaded: ${escapeHtml(templateName)}</div>`;
+      return templateBuffer;
+    }catch(err){lastError=err.message;}
+  }
+  throw new Error("Stored template not found. Put template.xlsx or template.xlsm in the same GitHub folder as this HTML file. " + lastError);
 }
+function setCell(ws,address,value){const cell=ws.getCell(address);cell.value=value || "";}
+function getSheet(workbook,names){for(const n of names){const ws=workbook.getWorksheet(n);if(ws)return ws;}return workbook.worksheets[0];}
+function todayText(){return new Date().toLocaleDateString("en-GB");}
+async function downloadExcelFile(){
+  try{
+    await loadStoredTemplate();
+    const workbook=new ExcelJS.Workbook();
+    await workbook.xlsx.load(templateBuffer);
+    workbook.creator="Machine Movement App";
+    workbook.modified=new Date();
+    const movement=getSheet(workbook,["Master Movement","Movement"]);
+    const docket=getSheet(workbook,["Transport Docket","Docket"]);
+    const today=todayText();
 
-function nextStep(){
-const field=document.getElementById("field");
-if(!field.value.trim()) return;
-data[steps[current][1]]=field.value.trim();
-current++;
-render();
+    // Direct field mapping into the existing workbook cells. Adjust these cell addresses only if the template changes.
+    if(movement){
+      setCell(movement,"B1",data.currentSite); setCell(movement,"C1",data.currentSite); setCell(movement,"D1",data.currentSite);
+      setCell(movement,"B2",today); setCell(movement,"C2",today); setCell(movement,"D2",today);
+      setCell(movement,"B4",data.destination);
+      setCell(movement,"B5",data.machineName);
+      setCell(movement,"B6",data.model);
+      setCell(movement,"B7",data.stock);
+      setCell(movement,"B8",data.serial);
+    }
+    if(docket){
+      setCell(docket,"A5",data.currentSite);
+      setCell(docket,"B5",today);
+      setCell(docket,"C5",data.machineName);
+      setCell(docket,"D5",data.model);
+      setCell(docket,"E5",data.stock);
+      setCell(docket,"F5",data.serial);
+      setCell(docket,"G5",data.destination);
+    }
+
+    let photos=workbook.getWorksheet("Photos");
+    if(!photos) photos=workbook.addWorksheet("Photos");
+    photos.spliceRows(1, photos.rowCount || 1);
+    photos.getCell("A1").value="Machine Photos";
+    photos.getCell("A1").font={bold:true,size:16};
+    photos.getColumn(1).width=18; photos.getColumn(2).width=70;
+    if(data.photos.length===0){photos.getCell("A3").value="No photos added";}
+    data.photos.forEach((src,i)=>{
+      const ext=src.includes("image/png")?"png":"jpeg";
+      const imageId=workbook.addImage({base64:src,extension:ext});
+      const row=3+(i*18);
+      photos.getCell(`A${row}`).value=`Photo ${i+1}`;
+      photos.addImage(imageId,{tl:{col:1,row:row-1},ext:{width:360,height:260}});
+      for(let r=row;r<row+16;r++) photos.getRow(r).height=18;
+    });
+
+    const out=await workbook.xlsx.writeBuffer();
+    const blob=new Blob([out],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download="machine-movement-output.xlsx";
+    a.click();
+    URL.revokeObjectURL(url);
+  }catch(err){
+    alert("Excel export failed: "+err.message);
+    console.error(err);
+  }
 }
-
-function backStep(){
-current--;
-render();
-}
-
+function escapeHtml(str){return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");}
 render();
 </script>
 </body>
