@@ -1,321 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Machine Movement App</title>
-
 <style>
-:root{
-  --bg:#0f1419;
-  --panel:#171e25;
-  --panel2:#202933;
-  --text:#f5f7fb;
-  --muted:#aab5c2;
-  --accent:#d4af37;
-  --line:rgba(255,255,255,.10);
-  --danger:#ff6b6b;
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#111820;
+color:white;
 }
-*{box-sizing:border-box}
-html,body{
-  margin:0;
-  min-height:100%;
-  font-family:Arial, Helvetica, sans-serif;
-  background:linear-gradient(135deg,#0b0f13,#18222c);
-  color:var(--text);
-}
-body{display:flex;justify-content:center}
-.app{width:100%;max-width:980px;padding:16px}
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
-h1{margin:0;font-size:clamp(22px,4vw,34px)}
-.badge{
-  color:var(--accent);
-  border:1px solid rgba(212,175,55,.55);
-  border-radius:999px;
-  padding:8px 12px;
-  font-size:13px;
-  white-space:nowrap;
+.container{
+max-width:700px;
+margin:auto;
+padding:20px;
 }
 .card{
-  width:100%;
-  background:rgba(23,30,37,.96);
-  border:1px solid var(--line);
-  border-radius:22px;
-  padding:clamp(18px,3vw,34px);
-  box-shadow:0 18px 50px rgba(0,0,0,.3);
+background:#1b2430;
+padding:20px;
+border-radius:16px;
 }
-.step-line{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
-.step-text{color:var(--accent);font-weight:bold;font-size:15px}
-.device-note{color:var(--muted);font-size:13px}
-.progress{width:100%;height:12px;background:#2b3540;border-radius:999px;overflow:hidden;margin-bottom:24px}
-.bar{height:100%;width:0%;background:var(--accent);transition:.25s ease}
-h2{margin:0 0 18px;font-size:clamp(26px,5vw,42px)}
-label{display:block;font-size:clamp(16px,2.5vw,22px);font-weight:bold;margin-bottom:10px}
+h1{margin-top:0}
 input{
-  width:100%;
-  min-height:58px;
-  border-radius:16px;
-  border:1px solid var(--line);
-  background:#0e141a;
-  color:var(--text);
-  font-size:clamp(19px,3vw,26px);
-  padding:16px;
-  outline:none;
+width:100%;
+padding:16px;
+font-size:18px;
+border-radius:12px;
+border:1px solid #444;
+background:#111;
+color:#fff;
+box-sizing:border-box;
 }
-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,175,55,.15)}
-.hint{color:var(--muted);font-size:clamp(13px,2vw,16px);margin-top:10px}
-.buttons{display:grid;grid-template-columns:130px 1fr;gap:12px;margin-top:22px}
 button{
-  min-height:58px;
-  border:0;
-  border-radius:16px;
-  padding:14px 16px;
-  font-weight:bold;
-  font-size:clamp(16px,2.5vw,22px);
-  cursor:pointer;
+width:100%;
+padding:16px;
+font-size:18px;
+border:none;
+border-radius:12px;
+margin-top:12px;
+cursor:pointer;
 }
-.primary{background:var(--accent);color:#111}
-.secondary{background:#2b3540;color:var(--text)}
-.danger{background:#4a2020;color:#fff}
-button:disabled{opacity:.35;cursor:not-allowed}
-.quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
-.quick{background:#26313c;color:#fff;min-height:48px;font-size:15px}
-.review-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}
-.review-row{
-  display:flex;
-  justify-content:space-between;
-  gap:14px;
-  background:var(--panel2);
-  padding:15px;
-  border-radius:15px;
-  border:1px solid var(--line);
+.next{
+background:#d4af37;
+color:#111;
+font-weight:bold;
 }
-.review-row span:first-child{color:var(--muted)}
-.review-row span:last-child{text-align:right;font-weight:bold}
-.review-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
-.form-paper{display:none;background:#fff;color:#000;padding:30px;font-family:Arial, Helvetica, sans-serif}
-.paper-table{width:100%;border-collapse:collapse;margin-top:20px}
-.paper-table th,.paper-table td{border:1px solid #000;padding:12px;text-align:left}
-.sig{margin-top:55px;display:grid;grid-template-columns:1fr 1fr;gap:25px}
-.line{border-top:1px solid #000;padding-top:8px}
-
-@media (max-width:600px){
-  body{display:block}
-  .app{padding:12px}
-  .top{align-items:flex-start}
-  .badge{font-size:12px;padding:7px 9px}
-  .card{border-radius:18px;padding:18px}
-  .buttons{grid-template-columns:1fr}
-  .secondary{order:2}
-  .primary{order:1}
-  button,input{min-height:64px}
-  .quick-grid{grid-template-columns:1fr}
-  .review-actions{grid-template-columns:1fr}
-  .review-row{flex-direction:column}
-  .review-row span:last-child{text-align:left;font-size:20px}
+.back{
+background:#333;
+color:white;
 }
-@media (min-width:601px) and (max-width:900px){
-  .app{padding:22px}
-  .card{padding:28px}
-  .buttons{grid-template-columns:160px 1fr}
+.progress{
+height:10px;
+background:#333;
+border-radius:10px;
+margin-bottom:20px;
+overflow:hidden;
 }
-@media (min-width:901px){
-  .app{padding:36px}
-  .card{max-width:880px;margin:0 auto}
-  .review-grid{grid-template-columns:1fr 1fr}
-}
-@media print{
-  body{background:#fff;display:block}
-  .app{display:none}
-  .form-paper{display:block}
+.bar{
+height:100%;
+background:#d4af37;
+width:0%;
 }
 </style>
 </head>
-
 <body>
-
-<main class="app">
-  <div class="top">
-    <h1>Machine Movement App</h1>
-    <div class="badge">Phone • Tablet • Laptop</div>
-  </div>
-
-  <section class="card">
-    <div class="step-line">
-      <div class="step-text" id="stepText">Step 1 of 6</div>
-      <div class="device-note">Auto saves</div>
-    </div>
-
-    <div class="progress"><div class="bar" id="bar"></div></div>
-    <div id="stage"></div>
-
-    <div class="buttons">
-      <button class="secondary" id="backBtn" onclick="backStep()">Back</button>
-      <button class="primary" id="nextBtn" onclick="nextStep()">Next</button>
-    </div>
-  </section>
-</main>
-
-<div class="form-paper" id="paper">
-  <h2>Machine Movement Form</h2>
-  <p><strong>Date:</strong> <span id="pDate"></span></p>
-  <table class="paper-table">
-    <tr><th>Current Site</th><td id="pCurrentSite"></td></tr>
-    <tr><th>Going To</th><td id="pGoingTo"></td></tr>
-    <tr><th>Machine Name</th><td id="pMachineName"></td></tr>
-    <tr><th>Model</th><td id="pModel"></td></tr>
-    <tr><th>Stock Number</th><td id="pStock"></td></tr>
-    <tr><th>Serial Number</th><td id="pSerial"></td></tr>
-  </table>
-  <div class="sig">
-    <div class="line">Engineer / Driver Signature</div>
-    <div class="line">Received By</div>
-  </div>
+<div class="container">
+<div class="card">
+<h1>Machine Movement App</h1>
+<div class="progress"><div class="bar" id="bar"></div></div>
+<div id="app"></div>
+</div>
 </div>
 
 <script>
-const steps = [
-  {key:"currentSite",title:"Current site",label:"Where is the machine now?",placeholder:"Example: California Cliffs",quick:["California Cliffs","Vauxhall","Breydon","Summerfields"]},
-  {key:"goingTo",title:"Where it is going",label:"Where is the machine going?",placeholder:"Example: Sales / Warehouse / Another site",quick:["Sales","Warehouse","Vauxhall","Kessingland"]},
-  {key:"machineName",title:"Machine name",label:"Name of machine",placeholder:"Example: Monopoly Gold",quick:["Monopoly Gold","E-Claw","Toy Box","Mini Crane"]},
-  {key:"model",title:"Model",label:"Machine model",placeholder:"Example: Monopoly Gold Deluxe",quick:[]},
-  {key:"stock",title:"Stock",label:"Stock number",placeholder:"Example: 102 / CC-001",quick:[]},
-  {key:"serial",title:"Serial number",label:"Serial number",placeholder:"Example: SN00107285",quick:[]}
+const steps=[
+["Current Site","currentSite"],
+["Destination","destination"],
+["Machine Name","machineName"],
+["Model","model"],
+["Stock Number","stock"],
+["Serial Number","serial"]
 ];
 
-let current = 0;
-let data = JSON.parse(localStorage.getItem("movementFormData_clean") || "{}");
-
-function save(){localStorage.setItem("movementFormData_clean", JSON.stringify(data));}
+let current=0;
+let data={};
 
 function render(){
-  const stage=document.getElementById("stage");
-  const stepText=document.getElementById("stepText");
-  const bar=document.getElementById("bar");
-  const backBtn=document.getElementById("backBtn");
-  const nextBtn=document.getElementById("nextBtn");
+const app=document.getElementById("app");
+document.getElementById("bar").style.width=((current)/steps.length*100)+"%";
 
-  if(current < steps.length){
-    const s=steps[current];
-    stepText.textContent=`Step ${current+1} of ${steps.length}`;
-    bar.style.width=`${(current/steps.length)*100}%`;
-    backBtn.disabled=current===0;
-    nextBtn.textContent="Next";
-
-    stage.innerHTML=`
-      <h2>${s.title}</h2>
-      <label>${s.label}</label>
-      <input id="field" value="${escapeHtml(data[s.key] || "")}" placeholder="${s.placeholder}" autocomplete="off" />
-      ${s.quick.length ? `<div class="quick-grid">${s.quick.map(item=>`<button class="quick" type="button" onclick="quickFill('${s.key}','${escapeJs(item)}')">${escapeHtml(item)}</button>`).join("")}</div>` : ""}
-      <div class="hint">This stage must be completed before you can move forward.</div>
-    `;
-
-    const field=document.getElementById("field");
-    field.focus();
-    field.addEventListener("input",()=>{
-      data[s.key]=field.value.trim();
-      save();
-      updateNextButton();
-    });
-    field.addEventListener("keydown",e=>{
-      if(e.key==="Enter" && field.value.trim()) nextStep();
-    });
-    updateNextButton();
-
-  } else {
-    stepText.textContent="Review";
-    bar.style.width="100%";
-    backBtn.disabled=false;
-    nextBtn.textContent="Print / Save PDF";
-
-    stage.innerHTML=`
-      <h2>Review movement</h2>
-      <div class="review-grid">
-        ${steps.map(s=>`<div class="review-row"><span>${s.title}</span><span>${escapeHtml(data[s.key] || "")}</span></div>`).join("")}
-      </div>
-      <div class="review-actions">
-        <button class="secondary" onclick="downloadCSV()">Download CSV</button>
-        <button class="danger" onclick="clearForm()">Clear Form</button>
-      </div>
-      <div class="hint">Press Print / Save PDF, then choose “Save as PDF”.</div>
-    `;
-    fillPaper();
-  }
+if(current<steps.length){
+app.innerHTML=`
+<h2>${steps[current][0]}</h2>
+<input id="field" value="${data[steps[current][1]]||''}">
+<button class="next" onclick="nextStep()">Next</button>
+${current>0?'<button class="back" onclick="backStep()">Back</button>':''}
+`;
+}else{
+app.innerHTML=`
+<h2>Review</h2>
+<p><strong>Current Site:</strong> ${data.currentSite||''}</p>
+<p><strong>Destination:</strong> ${data.destination||''}</p>
+<p><strong>Machine Name:</strong> ${data.machineName||''}</p>
+<p><strong>Model:</strong> ${data.model||''}</p>
+<p><strong>Stock Number:</strong> ${data.stock||''}</p>
+<p><strong>Serial Number:</strong> ${data.serial||''}</p>
+<button class="next" onclick="window.print()">Print / Save PDF</button>
+`;
 }
-
-function quickFill(key,value){
-  data[key]=value;
-  save();
-  const field=document.getElementById("field");
-  if(field) field.value=value;
-  updateNextButton();
-}
-
-function updateNextButton(){
-  const nextBtn=document.getElementById("nextBtn");
-  if(current < steps.length){
-    nextBtn.disabled=!data[steps[current].key];
-  }
 }
 
 function nextStep(){
-  if(current < steps.length){
-    const field=document.getElementById("field");
-    if(field && !field.value.trim()) return;
-    current++;
-    render();
-  } else {
-    fillPaper();
-    window.print();
-  }
+const field=document.getElementById("field");
+if(!field.value.trim()) return;
+data[steps[current][1]]=field.value.trim();
+current++;
+render();
 }
 
 function backStep(){
-  if(current > 0){
-    current--;
-    render();
-  }
+current--;
+render();
 }
-
-function fillPaper(){
-  document.getElementById("pDate").textContent=new Date().toLocaleDateString("en-GB");
-  document.getElementById("pCurrentSite").textContent=data.currentSite || "";
-  document.getElementById("pGoingTo").textContent=data.goingTo || "";
-  document.getElementById("pMachineName").textContent=data.machineName || "";
-  document.getElementById("pModel").textContent=data.model || "";
-  document.getElementById("pStock").textContent=data.stock || "";
-  document.getElementById("pSerial").textContent=data.serial || "";
-}
-
-function downloadCSV(){
-  const headers=steps.map(s=>s.title);
-  const values=steps.map(s=>data[s.key] || "");
-  const csv=headers.join(",")+"\n"+values.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",");
-  const blob=new Blob([csv],{type:"text/csv"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;
-  a.download="machine-movement.csv";
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function clearForm(){
-  if(confirm("Clear this movement form?")){
-    data={};
-    save();
-    current=0;
-    render();
-  }
-}
-
-function escapeHtml(str){
-  return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
-}
-function escapeJs(str){return String(str).replaceAll("'","\\'");}
 
 render();
 </script>
-
 </body>
 </html>
