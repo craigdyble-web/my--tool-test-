@@ -6,7 +6,11 @@
 <title>Machine Movement App</title>
 <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
 <style>
-body{margin:0;font-family:Arial,sans-serif;background:#111820;color:white}.container{max-width:700px;margin:auto;padding:20px}.card{background:#1b2430;padding:20px;border-radius:16px}h1{margin-top:0}input,select{width:100%;padding:16px;font-size:18px;border-radius:12px;border:1px solid #444;background:#111;color:#fff;box-sizing:border-box}input[type="file"]{background:#111;border:1px dashed #d4af37}button{width:100%;padding:16px;font-size:18px;border:none;border-radius:12px;margin-top:12px;cursor:pointer}.next{background:#d4af37;color:#111;font-weight:bold}.back{background:#333;color:white}.danger{background:#5a2424;color:white}.progress{height:10px;background:#333;border-radius:10px;margin-bottom:20px;overflow:hidden}.bar{height:100%;background:#d4af37;width:0%}.small{color:#b7c1cc;font-size:14px;line-height:1.4}.photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:15px}.photo-box{background:#111;border:1px solid #333;border-radius:12px;overflow:hidden}.photo-box img{width:100%;display:block}.photo-box button{margin:0;border-radius:0;background:#5a2424;color:white;font-size:14px;padding:10px}.review-box{background:#111;border:1px solid #333;padding:12px;border-radius:12px;margin:10px 0}.notice{background:#101820;border:1px solid #d4af37;color:#f3e4a3;padding:12px;border-radius:12px;margin:12px 0}.ok{background:#18351f;border:1px solid #2f9e44;color:#d8ffd8;padding:12px;border-radius:12px;margin:12px 0}.error{background:#3b1818;border:1px solid #b42318;color:#ffdcdc;padding:12px;border-radius:12px;margin:12px 0}@media(max-width:600px){.container{padding:12px}.card{padding:18px}h1{font-size:28px}input,select,button{font-size:18px;min-height:58px}.photo-grid{grid-template-columns:1fr}}
+:root{--blue:#005BBB;--red:#D32F2F;--text:#1f2937;--muted:#667085;--line:#d0d5dd;--bg:#f5f7fb;--card:#ffffff}
+body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--text)}
+.container{max-width:700px;margin:auto;padding:20px}.card{background:var(--card);padding:20px;border-radius:16px;box-shadow:0 8px 24px rgba(16,24,40,.08);border:1px solid #eaecf0}h1{margin-top:0;color:var(--text)}
+input,select{width:100%;padding:16px;font-size:18px;border-radius:12px;border:1px solid var(--line);background:#fff;color:var(--text);box-sizing:border-box}input[type="file"]{background:#fff;border:1px dashed var(--blue)}
+button{width:100%;padding:16px;font-size:18px;border:none;border-radius:12px;margin-top:12px;cursor:pointer;font-weight:bold}.next{background:var(--blue);color:#fff}.back{background:var(--red);color:white}.danger{background:var(--red);color:white}.progress{height:10px;background:#e4e7ec;border-radius:10px;margin-bottom:20px;overflow:hidden}.bar{height:100%;background:var(--blue);width:0%}.small{color:var(--muted);font-size:14px;line-height:1.4}.machine-count{text-align:right;color:var(--muted);font-size:14px;line-height:1.4;margin:0 0 12px 0;font-weight:bold}.photo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:15px}.photo-box{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}.photo-box img{width:100%;display:block}.photo-box button{margin:0;border-radius:0;background:var(--red);color:white;font-size:14px;padding:10px}.review-box{background:#fff;border:1px solid var(--line);padding:12px;border-radius:12px;margin:10px 0}.notice{background:#eef4ff;border:1px solid var(--blue);color:#1849a9;padding:12px;border-radius:12px;margin:12px 0}.ok{background:#ecfdf3;border:1px solid #12b76a;color:#027a48;padding:12px;border-radius:12px;margin:12px 0}.error{background:#fef3f2;border:1px solid var(--red);color:#b42318;padding:12px;border-radius:12px;margin:12px 0}@media(max-width:600px){.container{padding:12px}.card{padding:18px}h1{font-size:28px}input,select,button{font-size:18px;min-height:58px}.photo-grid{grid-template-columns:1fr}.machine-count{text-align:right}}
 </style>
 </head>
 <body>
@@ -24,8 +28,10 @@ const steps=[
   ["Machine Photos","photos","photos"]
 ];
 
+const MAX_MACHINES=8;
 let current=0;
 let data=JSON.parse(localStorage.getItem("machineMovementLockedBase") || "{}");
+if(!Array.isArray(data.machines)) data.machines=[];
 if(!data.photos) data.photos=[];
 if(!data.movementDate) data.movementDate=new Date().toISOString().slice(0,10);
 let templateBuffer=null;
@@ -33,18 +39,95 @@ let templateName="";
 const storedTemplateFiles=["template.xlsm","template.xlsx"];
 
 function save(){localStorage.setItem("machineMovementLockedBase",JSON.stringify(data));}
-function movementPlaceLabel(){return (String(data.movementType||"").toUpperCase()==="IN") ? "Received From" : "Destination";}
-function movementTypeDisplay(){return String(data.movementType||"").toUpperCase();}
-function movementDateText(){
-  if(!data.movementDate) return todayText();
-  const parts=String(data.movementDate).split("-");
+function movementPlaceLabel(item=data){return (String(item.movementType||"").toUpperCase()==="IN") ? "Received From" : "Destination";}
+function movementTypeDisplay(item=data){return String(item.movementType||"").toUpperCase();}
+function movementDateText(item=data){
+  if(!item.movementDate) return todayText();
+  const parts=String(item.movementDate).split("-");
   if(parts.length===3) return `${parts[2]}/${parts[1]}/${parts[0]}`;
-  return data.movementDate;
+  return item.movementDate;
+}
+function machineSnapshot(){
+  return {
+    currentSite:data.currentSite||"",
+    movementDate:data.movementDate||new Date().toISOString().slice(0,10),
+    movementType:movementTypeDisplay(),
+    movementPlace:data.movementPlace||"",
+    machineName:data.machineName||"",
+    model:data.model||"",
+    stock:data.stock||"",
+    serial:data.serial||"",
+    photos:Array.isArray(data.photos)?[...data.photos]:[]
+  };
+}
+function currentMachineComplete(){
+  return !!(data.currentSite && data.movementDate && data.movementType && data.movementPlace && data.machineName && data.model && data.stock && data.serial);
+}
+function machinesForExport(){
+  const list=Array.isArray(data.machines)?[...data.machines]:[];
+  if(currentMachineComplete()) list.push(machineSnapshot());
+  return list.slice(0,MAX_MACHINES);
+}
+function clearCurrentMachine(){
+  data.currentSite="";
+  data.movementDate=new Date().toISOString().slice(0,10);
+  data.movementType="";
+  data.movementPlace="";
+  data.machineName="";
+  data.model="";
+  data.stock="";
+  data.serial="";
+  data.photos=[];
+}
+function addAnotherMachine(){
+  if(!currentMachineComplete()){
+    alert("Complete this machine before adding another one.");
+    return;
+  }
+  if(data.machines.length>=MAX_MACHINES){
+    alert("Maximum 8 machines per sheet.");
+    return;
+  }
+  data.machines.push(machineSnapshot());
+  if(data.machines.length>=MAX_MACHINES){
+    save();
+    alert("8 machines added. You can now download the sheet.");
+    render();
+    return;
+  }
+  clearCurrentMachine();
+  save();
+  current=0;
+  render();
+}
+
+function hasCurrentMachineData(){
+  return !!(data.currentSite || data.movementType || data.movementPlace || data.machineName || data.model || data.stock || data.serial || (Array.isArray(data.photos) && data.photos.length));
+}
+function returnToPreviousMachine(){
+  if(!Array.isArray(data.machines) || data.machines.length===0){return;}
+  if(hasCurrentMachineData() && !confirm("Return to previous machine? The current unfinished machine will be removed.")){return;}
+  const previous=data.machines.pop();
+  data.currentSite=previous.currentSite||"";
+  data.movementDate=previous.movementDate||new Date().toISOString().slice(0,10);
+  data.movementType=previous.movementType||"";
+  data.movementPlace=previous.movementPlace||"";
+  data.machineName=previous.machineName||"";
+  data.model=previous.model||"";
+  data.stock=previous.stock||"";
+  data.serial=previous.serial||"";
+  data.photos=Array.isArray(previous.photos)?[...previous.photos]:[];
+  save();
+  current=0;
+  render();
 }
 
 function render(){
   const app=document.getElementById("app");
   document.getElementById("bar").style.width=((current)/steps.length*100)+"%";
+  const savedCount=Array.isArray(data.machines)?data.machines.length:0;
+  const returnPreviousButton=savedCount>0?'<button class="back" onclick="returnToPreviousMachine()">Return To Previous Machine</button>':'';
+  const machineCountHtml=`<p class="machine-count">Machine ${Math.min(savedCount+1,MAX_MACHINES)} of ${MAX_MACHINES}</p>`;
   if(current<8){
     const step=steps[current];
     const key=step[1];
@@ -61,11 +144,15 @@ function render(){
       inputHtml=`<input id="field" value="${escapeHtml(data[key]||'')}" autocomplete="off">`;
     }
 
-    app.innerHTML=`<h2>${title}</h2>${inputHtml}<button class="next" onclick="nextStep()">Next</button>${current>0?'<button class="back" onclick="backStep()">Back</button>':''}${current===0?'<button class="danger" onclick="clearForm()">Clear Form</button>':''}`;
+    app.innerHTML=`<h2>${title}</h2>${machineCountHtml}${inputHtml}<button class="next" onclick="nextStep()">Next</button>${current>0?'<button class="back" onclick="backStep()">Back</button>':''}${returnPreviousButton}${current===0?'<button class="danger" onclick="clearForm()">Clear Form</button>':''}`;
   }else if(current===8){
-    app.innerHTML=`<h2>Machine Photos</h2><p class="small">Take or upload up to 5 photos of the machine.</p><input id="photoInput" type="file" accept="image/*" capture="environment" multiple onchange="addPhotos(event)"><p class="small">${data.photos.length} of 5 photos added</p><div class="photo-grid">${data.photos.map((p,i)=>`<div class="photo-box"><img src="${p}"><button onclick="removePhoto(${i})">Remove photo</button></div>`).join("")}</div><button class="next" onclick="nextStep()">Next</button><button class="back" onclick="backStep()">Back</button>`;
+    app.innerHTML=`<h2>Machine Photos</h2>${machineCountHtml}<p class="small">Take or upload up to 5 photos of the machine.</p><input id="photoInput" type="file" accept="image/*" capture="environment" multiple onchange="addPhotos(event)"><p class="small">${data.photos.length} of 5 photos added</p><div class="photo-grid">${data.photos.map((p,i)=>`<div class="photo-box"><img src="${p}"><button onclick="removePhoto(${i})">Remove photo</button></div>`).join("")}</div><button class="next" onclick="nextStep()">Next</button><button class="back" onclick="backStep()">Back</button>${returnPreviousButton}`;
   }else{
+    const exportCount=machinesForExport().length;
+    const canAdd=savedCount<MAX_MACHINES;
     app.innerHTML=`<h2>Review</h2>
+      <p class="machine-count">${exportCount} of ${MAX_MACHINES} machines ready</p>
+      ${savedCount>0?`<div class="review-box"><strong>Saved Machines:</strong><br>${savedCount} already added to this sheet</div>`:""}
       <div class="review-box"><strong>Current Site:</strong><br>${escapeHtml(data.currentSite||'')}</div>
       <div class="review-box"><strong>Movement Date:</strong><br>${escapeHtml(movementDateText())}</div>
       <div class="review-box"><strong>Movement Type:</strong><br>${escapeHtml(movementTypeDisplay())}</div>
@@ -76,8 +163,10 @@ function render(){
       <div class="review-box"><strong>Serial Number:</strong><br>${escapeHtml(data.serial||'')}</div>
       <div class="review-box"><strong>Photos:</strong><br>${data.photos.length} attached</div>
       <div class="photo-grid">${data.photos.map(p=>`<div class="photo-box"><img src="${p}"></div>`).join("")}</div>
+      ${canAdd?'<button class="next" onclick="addAnotherMachine()">Add Another Machine To This Sheet</button>':'<div class="ok">Maximum 8 machines added.</div>'}
       <button class="next" onclick="downloadExcelFile()">Download Filled Excel File</button>
       <button class="back" onclick="backStep()">Back</button>
+      ${returnPreviousButton}
       <button class="danger" onclick="clearForm()">Clear Form</button>`;
   }
 }
@@ -98,7 +187,7 @@ function nextStep(){
 function backStep(){if(current>0){current--;render();}}
 function addPhotos(event){const files=Array.from(event.target.files);const remaining=5-data.photos.length;if(remaining<=0){alert("Maximum 5 photos allowed.");return;}files.slice(0,remaining).forEach(file=>{const reader=new FileReader();reader.onload=e=>{data.photos.push(e.target.result);save();render();};reader.readAsDataURL(file);});if(files.length>remaining) alert("Only 5 photos maximum. Extra photos were not added.");}
 function removePhoto(index){data.photos.splice(index,1);save();render();}
-function clearForm(){if(confirm("Clear this movement form?")){data={photos:[],movementDate:new Date().toISOString().slice(0,10)};save();current=0;templateBuffer=null;templateName="";render();}}
+function clearForm(){if(confirm("Clear this movement form and all added machines?")){data={machines:[],photos:[],movementDate:new Date().toISOString().slice(0,10)};save();current=0;templateBuffer=null;templateName="";render();}}
 async function loadStoredTemplate(){
   if(templateBuffer) return templateBuffer;
   let lastError="";
@@ -108,8 +197,6 @@ async function loadStoredTemplate(){
       if(!response.ok){lastError=`${fileName}: ${response.status}`; continue;}
       templateBuffer=await response.arrayBuffer();
       templateName=fileName;
-      const status=document.getElementById("templateStatus");
-      if(status) status.innerHTML=`<div class="ok">Template loaded: ${escapeHtml(templateName)}</div>`;
       return templateBuffer;
     }catch(err){lastError=err.message;}
   }
@@ -118,8 +205,12 @@ async function loadStoredTemplate(){
 function setCell(ws,address,value){const cell=ws.getCell(address);cell.value=value || "";}
 function getSheet(workbook,names){for(const n of names){const ws=workbook.getWorksheet(n);if(ws)return ws;}return workbook.worksheets[0];}
 function todayText(){return new Date().toLocaleDateString("en-GB");}
+function movementRow(index){return 5+index;}
+function docketRow(index){return 5+index;}
 async function downloadExcelFile(){
   try{
+    const machines=machinesForExport();
+    if(machines.length===0){alert("Add at least one machine before downloading.");return;}
     await loadStoredTemplate();
     const workbook=new ExcelJS.Workbook();
     await workbook.xlsx.load(templateBuffer);
@@ -127,32 +218,36 @@ async function downloadExcelFile(){
     workbook.modified=new Date();
     const movement=getSheet(workbook,["Master Movement","Movement"]);
     const docket=getSheet(workbook,["Transport Docket","Docket"]);
-    const moveDate=movementDateText();
-    const moveType=movementTypeDisplay();
-    const placeLabel=movementPlaceLabel();
 
-    // Direct field mapping into the existing workbook cells. Adjust these cell addresses only if the template changes.
-    if(movement){
-      setCell(movement,"B1",data.currentSite); setCell(movement,"C1",data.currentSite); setCell(movement,"D1",data.currentSite);
-      setCell(movement,"B2",moveDate); setCell(movement,"C2",moveDate); setCell(movement,"D2",moveDate);
-      setCell(movement,"B3",moveType); setCell(movement,"C3",moveType); setCell(movement,"D3",moveType);
-      setCell(movement,"B4",data.movementPlace);
-      setCell(movement,"A4",placeLabel);
-      setCell(movement,"B5",data.machineName);
-      setCell(movement,"B6",data.model);
-      setCell(movement,"B7",data.stock);
-      setCell(movement,"B8",data.serial);
-    }
-    if(docket){
-      setCell(docket,"A5",data.currentSite);
-      setCell(docket,"B5",moveDate);
-      setCell(docket,"C5",data.machineName);
-      setCell(docket,"D5",data.model);
-      setCell(docket,"E5",data.stock);
-      setCell(docket,"F5",data.serial);
-      setCell(docket,"G5",data.movementPlace);
-      setCell(docket,"H5",moveType);
-    }
+    machines.forEach((m,i)=>{
+      const moveDate=movementDateText(m);
+      const moveType=movementTypeDisplay(m);
+      const placeLabel=movementPlaceLabel(m);
+      const mr=movementRow(i);
+      const dr=docketRow(i);
+
+      if(movement){
+        setCell(movement,`A${mr}`,m.currentSite);
+        setCell(movement,`B${mr}`,moveDate);
+        setCell(movement,`C${mr}`,moveType);
+        setCell(movement,`D${mr}`,placeLabel);
+        setCell(movement,`E${mr}`,m.movementPlace);
+        setCell(movement,`F${mr}`,m.machineName);
+        setCell(movement,`G${mr}`,m.model);
+        setCell(movement,`H${mr}`,m.stock);
+        setCell(movement,`I${mr}`,m.serial);
+      }
+      if(docket){
+        setCell(docket,`A${dr}`,m.currentSite);
+        setCell(docket,`B${dr}`,moveDate);
+        setCell(docket,`C${dr}`,m.machineName);
+        setCell(docket,`D${dr}`,m.model);
+        setCell(docket,`E${dr}`,m.stock);
+        setCell(docket,`F${dr}`,m.serial);
+        setCell(docket,`G${dr}`,m.movementPlace);
+        setCell(docket,`H${dr}`,moveType);
+      }
+    });
 
     let photos=workbook.getWorksheet("Photos");
     if(!photos) photos=workbook.addWorksheet("Photos");
@@ -160,15 +255,26 @@ async function downloadExcelFile(){
     photos.getCell("A1").value="Machine Photos";
     photos.getCell("A1").font={bold:true,size:16};
     photos.getColumn(1).width=18; photos.getColumn(2).width=70;
-    if(data.photos.length===0){photos.getCell("A3").value="No photos added";}
-    data.photos.forEach((src,i)=>{
-      const ext=src.includes("image/png")?"png":"jpeg";
-      const imageId=workbook.addImage({base64:src,extension:ext});
-      const row=3+(i*18);
-      photos.getCell(`A${row}`).value=`Photo ${i+1}`;
-      photos.addImage(imageId,{tl:{col:1,row:row-1},ext:{width:360,height:260}});
-      for(let r=row;r<row+16;r++) photos.getRow(r).height=18;
+    let row=3;
+    let photoCount=0;
+    machines.forEach((m,mi)=>{
+      photos.getCell(`A${row}`).value=`Machine ${mi+1}: ${m.machineName || ""}`;
+      photos.getCell(`A${row}`).font={bold:true};
+      row+=2;
+      const pics=Array.isArray(m.photos)?m.photos:[];
+      if(pics.length===0){photos.getCell(`A${row}`).value="No photos added"; row+=2; return;}
+      pics.forEach((src,pi)=>{
+        photoCount++;
+        const ext=src.includes("image/png")?"png":"jpeg";
+        const imageId=workbook.addImage({base64:src,extension:ext});
+        photos.getCell(`A${row}`).value=`Photo ${pi+1}`;
+        photos.addImage(imageId,{tl:{col:1,row:row-1},ext:{width:360,height:260}});
+        for(let r=row;r<row+16;r++) photos.getRow(r).height=18;
+        row+=18;
+      });
+      row+=2;
     });
+    if(photoCount===0 && machines.every(m=>!m.photos || m.photos.length===0)){photos.getCell("A3").value="No photos added";}
 
     const out=await workbook.xlsx.writeBuffer();
     const blob=new Blob([out],{type:"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"});
