@@ -1,257 +1,160 @@
-
-
-
-
-
-california cliffs in monopoly gold.xlsm
-File
-
-I've opened the spreadsheet.
-
-It appears to be a machine movement record for Monopoly Gold at California Cliffs:
-
-Site: California Cliffs
-
-Date: 22 January 2026
-
-Movement: Out
-
-Destination: Sales
-
-Machine: Monopoly Gold
-
-Serial Number: SN00107285
-
-There are two sheets:
-
-Master Movement – machine movement details and meter/category information.
-
-Transport Docket – dispatch record showing the machine being sent from California Cliffs to Sales.
-
-What would you like me to do with it?
-
-Summarise the whole workbook
-
-Extract all machine details
-
-Convert it to a PDF
-
-Check formulas/macros
-
-Pull the data into a CSV/table
-
-Help build this into your meter app workflow
-
-Just tell me what you're trying to achieve with the file.
-
-
-ok make me app that could for this form >
-it needs to have a good work flow it needs to work through stages before you can go to the next.
-1 current site
-2 were its going
-3 name of machine 
-4 model
-5 stock 
-6 Serial number 
-
- 
-
-I’ll make you a simple staged web app: one screen per step, “Next” locked until the field is filled, then a final review and printable/exportable movement form.
-
-Thought for 4s
-Done — I made the staged app.
-
-
-It does:
-
-Step-by-step workflow
-
-Locks “Next” until answered
-
-Final review screen
-
-Print / Save as PDF
-
-Download CSV
-
-Auto-saves while filling in 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Machine Movement Form App</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Machine Movement App</title>
+
 <style>
-  :root{
-    --bg:#101418;
-    --card:#171d23;
-    --card2:#202832;
-    --text:#f4f7fb;
-    --muted:#aeb8c4;
-    --accent:#d4af37;
-    --danger:#ff6b6b;
-    --ok:#52d273;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:Arial, Helvetica, sans-serif;
-    background:linear-gradient(135deg,#0b0f13,#18212b);
-    color:var(--text);
-    min-height:100vh;
-  }
-  .wrap{max-width:760px;margin:0 auto;padding:22px}
-  header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
-    margin-bottom:18px;
-  }
-  h1{font-size:24px;margin:0}
-  .badge{
-    border:1px solid rgba(212,175,55,.5);
-    color:var(--accent);
-    padding:7px 10px;
-    border-radius:999px;
-    font-size:12px;
-    white-space:nowrap;
-  }
-  .card{
-    background:rgba(23,29,35,.96);
-    border:1px solid rgba(255,255,255,.08);
-    box-shadow:0 15px 50px rgba(0,0,0,.25);
-    border-radius:20px;
-    padding:20px;
-  }
-  .progress{
-    height:10px;
-    background:#2a333d;
-    border-radius:999px;
-    overflow:hidden;
-    margin:10px 0 20px;
-  }
-  .bar{
-    height:100%;
-    width:0%;
-    background:var(--accent);
-    transition:.25s;
-  }
-  .step-title{
-    color:var(--accent);
-    font-size:14px;
-    margin-bottom:6px;
-    font-weight:bold;
-  }
-  label{
-    display:block;
-    margin:14px 0 8px;
-    font-weight:bold;
-  }
-  input, select, textarea{
-    width:100%;
-    padding:15px;
-    border-radius:14px;
-    border:1px solid rgba(255,255,255,.12);
-    background:#0f141a;
-    color:var(--text);
-    font-size:18px;
-    outline:none;
-  }
-  input:focus, select:focus, textarea:focus{
-    border-color:var(--accent);
-  }
-  .hint{color:var(--muted);font-size:13px;margin-top:8px}
-  .buttons{
-    display:flex;
-    gap:10px;
-    margin-top:20px;
-  }
-  button{
-    border:0;
-    border-radius:14px;
-    padding:14px 16px;
-    font-weight:bold;
-    font-size:16px;
-    cursor:pointer;
-  }
-  .primary{background:var(--accent);color:#111;flex:1}
-  .secondary{background:#2a333d;color:var(--text)}
-  .danger{background:#4a2020;color:#fff}
-  button:disabled{
-    opacity:.35;
-    cursor:not-allowed;
-  }
-  .review-grid{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:10px;
-    margin-top:14px;
-  }
-  .review-row{
-    display:flex;
-    justify-content:space-between;
-    gap:14px;
-    background:var(--card2);
-    padding:13px;
-    border-radius:14px;
-    border:1px solid rgba(255,255,255,.06);
-  }
-  .review-row span:first-child{color:var(--muted)}
-  .review-row span:last-child{text-align:right;font-weight:bold}
-  .form-paper{
-    display:none;
-    background:#fff;
-    color:#000;
-    padding:30px;
-    font-family:Arial, Helvetica, sans-serif;
-  }
-  .form-paper h2{margin-top:0}
-  .paper-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:20px;
-  }
-  .paper-table th,.paper-table td{
-    border:1px solid #000;
-    padding:12px;
-    text-align:left;
-  }
-  .sig{
-    margin-top:50px;
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:20px;
-  }
-  .line{border-top:1px solid #000;padding-top:8px}
-  @media print{
-    body{background:#fff}
-    .wrap{display:none}
-    .form-paper{display:block}
-  }
+:root{
+  --bg:#0f1419;
+  --panel:#171e25;
+  --panel2:#202933;
+  --text:#f5f7fb;
+  --muted:#aab5c2;
+  --accent:#d4af37;
+  --line:rgba(255,255,255,.10);
+  --danger:#ff6b6b;
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  min-height:100%;
+  font-family:Arial, Helvetica, sans-serif;
+  background:linear-gradient(135deg,#0b0f13,#18222c);
+  color:var(--text);
+}
+body{display:flex;justify-content:center}
+.app{width:100%;max-width:980px;padding:16px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+h1{margin:0;font-size:clamp(22px,4vw,34px)}
+.badge{
+  color:var(--accent);
+  border:1px solid rgba(212,175,55,.55);
+  border-radius:999px;
+  padding:8px 12px;
+  font-size:13px;
+  white-space:nowrap;
+}
+.card{
+  width:100%;
+  background:rgba(23,30,37,.96);
+  border:1px solid var(--line);
+  border-radius:22px;
+  padding:clamp(18px,3vw,34px);
+  box-shadow:0 18px 50px rgba(0,0,0,.3);
+}
+.step-line{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.step-text{color:var(--accent);font-weight:bold;font-size:15px}
+.device-note{color:var(--muted);font-size:13px}
+.progress{width:100%;height:12px;background:#2b3540;border-radius:999px;overflow:hidden;margin-bottom:24px}
+.bar{height:100%;width:0%;background:var(--accent);transition:.25s ease}
+h2{margin:0 0 18px;font-size:clamp(26px,5vw,42px)}
+label{display:block;font-size:clamp(16px,2.5vw,22px);font-weight:bold;margin-bottom:10px}
+input{
+  width:100%;
+  min-height:58px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:#0e141a;
+  color:var(--text);
+  font-size:clamp(19px,3vw,26px);
+  padding:16px;
+  outline:none;
+}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,175,55,.15)}
+.hint{color:var(--muted);font-size:clamp(13px,2vw,16px);margin-top:10px}
+.buttons{display:grid;grid-template-columns:130px 1fr;gap:12px;margin-top:22px}
+button{
+  min-height:58px;
+  border:0;
+  border-radius:16px;
+  padding:14px 16px;
+  font-weight:bold;
+  font-size:clamp(16px,2.5vw,22px);
+  cursor:pointer;
+}
+.primary{background:var(--accent);color:#111}
+.secondary{background:#2b3540;color:var(--text)}
+.danger{background:#4a2020;color:#fff}
+button:disabled{opacity:.35;cursor:not-allowed}
+.quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+.quick{background:#26313c;color:#fff;min-height:48px;font-size:15px}
+.review-grid{display:grid;grid-template-columns:1fr;gap:10px;margin-top:14px}
+.review-row{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  background:var(--panel2);
+  padding:15px;
+  border-radius:15px;
+  border:1px solid var(--line);
+}
+.review-row span:first-child{color:var(--muted)}
+.review-row span:last-child{text-align:right;font-weight:bold}
+.review-actions{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.form-paper{display:none;background:#fff;color:#000;padding:30px;font-family:Arial, Helvetica, sans-serif}
+.paper-table{width:100%;border-collapse:collapse;margin-top:20px}
+.paper-table th,.paper-table td{border:1px solid #000;padding:12px;text-align:left}
+.sig{margin-top:55px;display:grid;grid-template-columns:1fr 1fr;gap:25px}
+.line{border-top:1px solid #000;padding-top:8px}
+
+@media (max-width:600px){
+  body{display:block}
+  .app{padding:12px}
+  .top{align-items:flex-start}
+  .badge{font-size:12px;padding:7px 9px}
+  .card{border-radius:18px;padding:18px}
+  .buttons{grid-template-columns:1fr}
+  .secondary{order:2}
+  .primary{order:1}
+  button,input{min-height:64px}
+  .quick-grid{grid-template-columns:1fr}
+  .review-actions{grid-template-columns:1fr}
+  .review-row{flex-direction:column}
+  .review-row span:last-child{text-align:left;font-size:20px}
+}
+@media (min-width:601px) and (max-width:900px){
+  .app{padding:22px}
+  .card{padding:28px}
+  .buttons{grid-template-columns:160px 1fr}
+}
+@media (min-width:901px){
+  .app{padding:36px}
+  .card{max-width:880px;margin:0 auto}
+  .review-grid{grid-template-columns:1fr 1fr}
+}
+@media print{
+  body{background:#fff;display:block}
+  .app{display:none}
+  .form-paper{display:block}
+}
 </style>
 </head>
+
 <body>
 
-<div class="wrap">
-  <header>
+<main class="app">
+  <div class="top">
     <h1>Machine Movement App</h1>
-    <div class="badge">Stage workflow</div>
-  </header>
+    <div class="badge">Phone • Tablet • Laptop</div>
+  </div>
 
-  <div class="card">
-    <div class="step-title" id="stepText">Step 1 of 6</div>
+  <section class="card">
+    <div class="step-line">
+      <div class="step-text" id="stepText">Step 1 of 6</div>
+      <div class="device-note">Auto saves</div>
+    </div>
+
     <div class="progress"><div class="bar" id="bar"></div></div>
-
     <div id="stage"></div>
 
     <div class="buttons">
       <button class="secondary" id="backBtn" onclick="backStep()">Back</button>
       <button class="primary" id="nextBtn" onclick="nextStep()">Next</button>
     </div>
-  </div>
-</div>
+  </section>
+</main>
 
 <div class="form-paper" id="paper">
   <h2>Machine Movement Form</h2>
@@ -265,92 +168,99 @@ Auto-saves while filling in
     <tr><th>Serial Number</th><td id="pSerial"></td></tr>
   </table>
   <div class="sig">
-    <div class="line">Driver / Engineer Signature</div>
+    <div class="line">Engineer / Driver Signature</div>
     <div class="line">Received By</div>
   </div>
 </div>
 
 <script>
 const steps = [
-  { key:"currentSite", title:"Current site", label:"Where is the machine now?", placeholder:"Example: California Cliffs" },
-  { key:"goingTo", title:"Where it is going", label:"Where is the machine going?", placeholder:"Example: Sales / Vauxhall / Warehouse" },
-  { key:"machineName", title:"Machine name", label:"Name of machine", placeholder:"Example: Monopoly Gold" },
-  { key:"model", title:"Model", label:"Machine model", placeholder:"Example: Monopoly Gold Deluxe" },
-  { key:"stock", title:"Stock", label:"Stock number", placeholder:"Example: 102 / CC-001" },
-  { key:"serial", title:"Serial number", label:"Serial number", placeholder:"Example: SN00107285" }
+  {key:"currentSite",title:"Current site",label:"Where is the machine now?",placeholder:"Example: California Cliffs",quick:["California Cliffs","Vauxhall","Breydon","Summerfields"]},
+  {key:"goingTo",title:"Where it is going",label:"Where is the machine going?",placeholder:"Example: Sales / Warehouse / Another site",quick:["Sales","Warehouse","Vauxhall","Kessingland"]},
+  {key:"machineName",title:"Machine name",label:"Name of machine",placeholder:"Example: Monopoly Gold",quick:["Monopoly Gold","E-Claw","Toy Box","Mini Crane"]},
+  {key:"model",title:"Model",label:"Machine model",placeholder:"Example: Monopoly Gold Deluxe",quick:[]},
+  {key:"stock",title:"Stock",label:"Stock number",placeholder:"Example: 102 / CC-001",quick:[]},
+  {key:"serial",title:"Serial number",label:"Serial number",placeholder:"Example: SN00107285",quick:[]}
 ];
 
 let current = 0;
-let data = JSON.parse(localStorage.getItem("movementFormData") || "{}");
+let data = JSON.parse(localStorage.getItem("movementFormData_clean") || "{}");
 
-function save(){
-  localStorage.setItem("movementFormData", JSON.stringify(data));
-}
+function save(){localStorage.setItem("movementFormData_clean", JSON.stringify(data));}
 
 function render(){
-  const stage = document.getElementById("stage");
-  const stepText = document.getElementById("stepText");
-  const bar = document.getElementById("bar");
-  const backBtn = document.getElementById("backBtn");
-  const nextBtn = document.getElementById("nextBtn");
+  const stage=document.getElementById("stage");
+  const stepText=document.getElementById("stepText");
+  const bar=document.getElementById("bar");
+  const backBtn=document.getElementById("backBtn");
+  const nextBtn=document.getElementById("nextBtn");
 
   if(current < steps.length){
-    const s = steps[current];
-    stepText.textContent = `Step ${current + 1} of ${steps.length}`;
-    bar.style.width = `${((current) / steps.length) * 100}%`;
-    backBtn.disabled = current === 0;
-    nextBtn.textContent = "Next";
+    const s=steps[current];
+    stepText.textContent=`Step ${current+1} of ${steps.length}`;
+    bar.style.width=`${(current/steps.length)*100}%`;
+    backBtn.disabled=current===0;
+    nextBtn.textContent="Next";
 
-    stage.innerHTML = `
+    stage.innerHTML=`
       <h2>${s.title}</h2>
       <label>${s.label}</label>
       <input id="field" value="${escapeHtml(data[s.key] || "")}" placeholder="${s.placeholder}" autocomplete="off" />
-      <div class="hint">You cannot move forward until this stage is completed.</div>
+      ${s.quick.length ? `<div class="quick-grid">${s.quick.map(item=>`<button class="quick" type="button" onclick="quickFill('${s.key}','${escapeJs(item)}')">${escapeHtml(item)}</button>`).join("")}</div>` : ""}
+      <div class="hint">This stage must be completed before you can move forward.</div>
     `;
 
-    const field = document.getElementById("field");
+    const field=document.getElementById("field");
     field.focus();
-    field.addEventListener("input", () => {
-      data[s.key] = field.value.trim();
+    field.addEventListener("input",()=>{
+      data[s.key]=field.value.trim();
       save();
       updateNextButton();
     });
-    field.addEventListener("keydown", e => {
-      if(e.key === "Enter" && field.value.trim()) nextStep();
+    field.addEventListener("keydown",e=>{
+      if(e.key==="Enter" && field.value.trim()) nextStep();
     });
     updateNextButton();
-  } else {
-    stepText.textContent = "Review";
-    bar.style.width = "100%";
-    backBtn.disabled = false;
-    nextBtn.textContent = "Print / Save PDF";
 
-    stage.innerHTML = `
-      <h2>Review before printing</h2>
+  } else {
+    stepText.textContent="Review";
+    bar.style.width="100%";
+    backBtn.disabled=false;
+    nextBtn.textContent="Print / Save PDF";
+
+    stage.innerHTML=`
+      <h2>Review movement</h2>
       <div class="review-grid">
-        ${steps.map(s => `<div class="review-row"><span>${s.title}</span><span>${escapeHtml(data[s.key] || "")}</span></div>`).join("")}
+        ${steps.map(s=>`<div class="review-row"><span>${s.title}</span><span>${escapeHtml(data[s.key] || "")}</span></div>`).join("")}
       </div>
-      <div class="buttons">
+      <div class="review-actions">
         <button class="secondary" onclick="downloadCSV()">Download CSV</button>
-        <button class="danger" onclick="clearForm()">Clear form</button>
+        <button class="danger" onclick="clearForm()">Clear Form</button>
       </div>
-      <div class="hint">Press Print / Save PDF, then choose “Save as PDF” on your device.</div>
+      <div class="hint">Press Print / Save PDF, then choose “Save as PDF”.</div>
     `;
     fillPaper();
   }
 }
 
+function quickFill(key,value){
+  data[key]=value;
+  save();
+  const field=document.getElementById("field");
+  if(field) field.value=value;
+  updateNextButton();
+}
+
 function updateNextButton(){
-  const nextBtn = document.getElementById("nextBtn");
+  const nextBtn=document.getElementById("nextBtn");
   if(current < steps.length){
-    const key = steps[current].key;
-    nextBtn.disabled = !data[key];
+    nextBtn.disabled=!data[steps[current].key];
   }
 }
 
 function nextStep(){
   if(current < steps.length){
-    const field = document.getElementById("field");
+    const field=document.getElementById("field");
     if(field && !field.value.trim()) return;
     current++;
     render();
@@ -368,48 +278,44 @@ function backStep(){
 }
 
 function fillPaper(){
-  document.getElementById("pDate").textContent = new Date().toLocaleDateString("en-GB");
-  document.getElementById("pCurrentSite").textContent = data.currentSite || "";
-  document.getElementById("pGoingTo").textContent = data.goingTo || "";
-  document.getElementById("pMachineName").textContent = data.machineName || "";
-  document.getElementById("pModel").textContent = data.model || "";
-  document.getElementById("pStock").textContent = data.stock || "";
-  document.getElementById("pSerial").textContent = data.serial || "";
+  document.getElementById("pDate").textContent=new Date().toLocaleDateString("en-GB");
+  document.getElementById("pCurrentSite").textContent=data.currentSite || "";
+  document.getElementById("pGoingTo").textContent=data.goingTo || "";
+  document.getElementById("pMachineName").textContent=data.machineName || "";
+  document.getElementById("pModel").textContent=data.model || "";
+  document.getElementById("pStock").textContent=data.stock || "";
+  document.getElementById("pSerial").textContent=data.serial || "";
 }
 
 function downloadCSV(){
-  const headers = steps.map(s => s.title);
-  const values = steps.map(s => data[s.key] || "");
-  const csv = headers.join(",") + "\n" + values.map(v => `"${String(v).replaceAll('"','""')}"`).join(",");
-  const blob = new Blob([csv], {type:"text/csv"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "machine-movement.csv";
+  const headers=steps.map(s=>s.title);
+  const values=steps.map(s=>data[s.key] || "");
+  const csv=headers.join(",")+"\n"+values.map(v=>`"${String(v).replaceAll('"','""')}"`).join(",");
+  const blob=new Blob([csv],{type:"text/csv"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="machine-movement.csv";
   a.click();
   URL.revokeObjectURL(url);
 }
 
 function clearForm(){
   if(confirm("Clear this movement form?")){
-    data = {};
+    data={};
     save();
-    current = 0;
+    current=0;
     render();
   }
 }
 
 function escapeHtml(str){
-  return String(str)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;")
-    .replaceAll('"',"&quot;")
-    .replaceAll("'","&#039;");
+  return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 }
+function escapeJs(str){return String(str).replaceAll("'","\\'");}
 
 render();
 </script>
+
 </body>
 </html>
-
