@@ -236,8 +236,29 @@ async function downloadExcelFile(){
 
       if(movement){
         const mc=movementColumn(i);
-        // Master Movement is a form-style sheet: each machine gets one column,
-        // and the details go down the rows beside the existing labels.
+
+        // Master Movement fixed layout:
+        // One machine = one column.
+        // The machine details go DOWN the rows, not left-to-right across row 5.
+        // Machine 1 uses column B, Machine 2 uses column C, etc.
+
+        // Keep/rebuild the left-hand labels so the sheet stays readable.
+        setCell(movement,"A1","Action Site");
+        setCell(movement,"A2","Date");
+        setCell(movement,"A3","Movement");
+        setCell(movement,"A5","Machine Name");
+        setCell(movement,"A6","Model");
+        setCell(movement,"A7","Stock");
+        setCell(movement,"A8","Serial");
+        setCell(movement,"A10",placeLabel);
+        setCell(movement,"A11","Location");
+
+        // Clear the old wrong sideways row values for this machine column area.
+        for(let r=1;r<=11;r++){
+          setCell(movement,`${mc}${r}`,"");
+        }
+
+        // Correct vertical fill.
         setCell(movement,`${mc}1`,m.currentSite);
         setCell(movement,`${mc}2`,moveDate);
         setCell(movement,`${mc}3`,moveType);
@@ -245,8 +266,8 @@ async function downloadExcelFile(){
         setCell(movement,`${mc}6`,m.model);
         setCell(movement,`${mc}7`,m.stock);
         setCell(movement,`${mc}8`,m.serial);
-        setCell(movement,`${mc}10`,m.currentSite);
-        setCell(movement,`${mc}11`,m.movementPlace);
+        setCell(movement,`${mc}10`,m.movementPlace);
+        setCell(movement,`${mc}11`,m.currentSite);
       }
       if(docket){
         setCell(docket,`A${dr}`,m.currentSite);
